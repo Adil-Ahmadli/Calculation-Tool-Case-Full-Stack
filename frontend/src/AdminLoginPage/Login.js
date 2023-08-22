@@ -9,6 +9,8 @@ function Login() {
     const userRef = useRef()
     const errRef  = useRef()
 
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
+
     const [email, setEmail] = useState("")
     const [validEmail, setValidEmail] = useState(true)
     
@@ -18,7 +20,23 @@ function Login() {
     const [errorMessage, setErrorMessage] = useState("")
 
     useEffect(() => {
-        userRef.current.focus();
+        const response =  fetch("http://localhost:8000/auth/user",
+        {
+            method:         "GET",
+            headers:        {"Content-Type": "application/json"},
+            credentials:    "include"
+        }).then(response => {
+                              response.json().then(content => {
+                                                                      if (content["detail"] === "successful") {
+                                                                        navigate("/admin")
+                                                                      }
+                                                                      else{
+                                                                        setIsAuthenticated(true)
+                                                                      }
+                                                                  }
+                                                      )
+                            } 
+              ).catch(err => console.log(err))
     }, [])
     
     useEffect(() => {
@@ -66,33 +84,41 @@ function Login() {
                 // if cookie send req to /user, if correct navigate to /admin
                 // if not cookie render page, send req to /login with data entered
       return ( 
-            <section>
-                <p ref={errRef} className={isError ? "errmsg" :
-                "offscreen"} aria-live="assertive">
-                    {errorMessage}
-                </p>
-                <h1>Log in</h1>
-                <form onSubmit={handleSubmit}>
-                    <label > E-mail: </label>
-                    <input type="text" id="username"
-                           ref={userRef} autoComplete="off"
-                           onChange={(e) => setEmail(e.target.value)}
-                           value={email} required/>
-                    
-                    <label > Password: </label>
-                    <input type="password" id="password"
-                           onChange={(e) => setPwd(e.target.value)}
-                           value={pwd} required/>
+        <>
+            { isAuthenticated 
+            ? 
+                <section>
+                    <p ref={errRef} className={isError ? "errmsg" :
+                    "offscreen"} aria-live="assertive">
+                        {errorMessage}
+                    </p>
+                    <h1>Log in</h1>
+                    <form onSubmit={handleSubmit}>
+                        <label > E-mail: </label>
+                        <input type="text" id="username"
+                            ref={userRef} autoComplete="off"
+                            onChange={(e) => setEmail(e.target.value)}
+                            value={email} required/>
+                        
+                        <label > Password: </label>
+                        <input type="password" id="password"
+                            onChange={(e) => setPwd(e.target.value)}
+                            value={pwd} required/>
 
-                    <button>Log in</button>
-                </form>
-                <p>
-                    Don't have an account?<br/>
-                    <span className="line">
-                        <a href='#'> Sign up </a>
-                    </span>
-                </p>
-            </section>
+                        <button>Log in</button>
+                    </form>
+                    <p>
+                        Don't have an account?<br/>
+                        <span className="line">
+                            <a href='#'> Sign up </a>
+                        </span>
+                    </p>
+                </section>
+            :
+                <>Run the backend server</>  
+            }
+        </>
+    
         )
     }
 

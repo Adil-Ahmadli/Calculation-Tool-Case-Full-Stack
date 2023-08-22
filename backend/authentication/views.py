@@ -2,7 +2,6 @@ import datetime, jwt
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 
 from .serializers import CustomUserSerializer
@@ -32,7 +31,7 @@ class UserLoginView(APIView):
         
         response = Response()
         response.set_cookie(key="jwt", value=token, httponly=True)
-        response.data = {"detail": "successful"}
+        response.data = {"detail": "successful", "token": token}
         
         return response
 
@@ -53,24 +52,21 @@ class UserView(APIView):
             payload = jwt.decode(token,
                                 "django-insecure-q*jygdox@4#y%$!y4e$a!9%$0p)h5!nqfl1*+pxa$alq+*ivd",
                                 algorithms=["HS256"])
-        except jwt.ExpiredSignatureError:
+        except jwt.ExpiredSignatureError or jwt.InvalidTokenError or jwt.error:
             raise AuthenticationFailed("Unauthenticated user!")
 
-        """
-        user = CustomUser.objects.filter(id=payload["id"]).first()
-        serializer = CustomUserSerializer(user)
-        response = Response(serializer.data)
-        """
-        response = Response()
-        response.data = {"detail": "successful"}
-        
+        user        = CustomUser.objects.filter(id=payload["id"]).first()
+        serializer  = CustomUserSerializer(user)
+        response    = Response(serializer.data)
+        response.data["detail"] = "successful"
+            
         return response
     
 class UserLogoutView(APIView):
     def post(self, request):
         response = Response()
         response.delete_cookie("jwt")
-        response.data = {"message": "successful"}
+        response.data = {"detail": "successful"}
         return response
         
         

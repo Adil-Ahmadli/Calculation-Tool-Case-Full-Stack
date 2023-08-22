@@ -5,9 +5,25 @@ function Home() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    navigate("/login")
-  }, [])
-  
+    const response =  fetch("http://localhost:8000/auth/user",
+    {
+        method:         "GET",
+        headers:        {"Content-Type": "application/json"},
+        credentials:    "include"
+    }).then(response => {
+                          response.json().then(content => {
+                                                                  if (content["detail"] === "successful") {
+                                                                    navigate("/admin")
+                                                                  }
+                                                                  else{
+                                                                    navigate("/login")
+                                                                  }
+                                                              }
+                                                  )
+                        } 
+          ).catch(err => console.log(err))
+}, [])
+
   return (
    <></>
   )

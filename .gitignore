@@ -1,3 +1,6 @@
 backend/server/__pycache__/*
 backend/authentication/__pycache__/*
 backend/authentication/migrations/*
+ideas.txt
+backend/calculation_app/__pycache__/*
+backend/calculation_app/migrations/__pycache__/*
